@@ -10,5 +10,6 @@ public class AnkleConstants {
     public static double kP = 0.04;
     public static double kI = 0;
     public static double kD = 0;
+    public static double gearRatio = 4;
 
 }

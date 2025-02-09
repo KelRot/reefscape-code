@@ -38,7 +38,7 @@ public class AnkleSubsystem extends SubsystemBase {
 
   public void setAngle(double angle) {
     if (isAngleInRange(angle)) {
-      closedLoopController.setReference(angle, ControlType.kMAXMotionPositionControl,
+      closedLoopController.setReference(angle * AnkleConstants.gearRatio, ControlType.kMAXMotionPositionControl,
           ClosedLoopSlot.kSlot0);
     } else {
       setDefault();
@@ -46,7 +46,7 @@ public class AnkleSubsystem extends SubsystemBase {
   }
 
   public void setAngleTest() {
-    double angle = SmartDashboard.getNumber("testAngleAnkle", 0);
+    double angle = SmartDashboard.getNumber("testAngleAnkle", 0) * AnkleConstants.gearRatio;
     if (isAngleInRange(angle)) {
       closedLoopController.setReference(angle, ControlType.kMAXMotionPositionControl,
           ClosedLoopSlot.kSlot0);

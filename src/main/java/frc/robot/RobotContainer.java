@@ -27,7 +27,6 @@ public class RobotContainer {
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     final CommandXboxController driverController = new CommandXboxController(0);
-    private PIDDebugger m_PidDebugger = new PIDDebugger();
     // The robot's subsystems and commands are defined here...
     private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(),
             "swerve"));

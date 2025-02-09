@@ -137,6 +137,8 @@ public class RobotStatusManager {
         }
         if (currentStatus == RobotStatus.Test_Mode) {
             m_PidDebugger.setSparkPIDControllerToDashboard("ankle", 0,0,0,0,0,0);
+            SmartDashboard.putNumber("testAngleAnkle", 0);
+            SmartDashboard.putNumber("testAngleArm", 0);
             return;
         }
 
