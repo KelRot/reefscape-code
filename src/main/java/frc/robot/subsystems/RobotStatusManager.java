@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.PIDDebugger;
 import frc.robot.Constants.GeneralConstants;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -15,7 +16,8 @@ public class RobotStatusManager {
         ShootingL2(0, 0, 255, true),       // Blinking Blue
         ShootingL3(255, 0, 0, true),       // Blinking Red
         Removing_Algae(0, 255, 0, true),    // Blinking Green
-        Climbing(0, 0, 0, false),          // Rainbow
+        Climbing(0, 0, 0, false),  
+        Test_Mode(0,0,0, false),        // Rainbow
         Nothing(0, 0, 0, false);           // Sliding 
         public final int r, g, b;
         public final boolean blinking;
@@ -27,6 +29,7 @@ public class RobotStatusManager {
             this.blinking = blinking;
         }
     }
+    private PIDDebugger m_PidDebugger;
 
     private RobotStatus currentStatus;
     private final AddressableLED ledStrip;
@@ -40,7 +43,8 @@ public class RobotStatusManager {
     private static final int LED_LENGTH = GeneralConstants.LED_LENGTH;
 
     public RobotStatusManager() {
-        this.currentStatus = RobotStatus.Alignment;
+        m_PidDebugger = new PIDDebugger();
+        this.currentStatus = RobotStatus.Nothing;
 
         // LED Şeridi Baslat
         ledStrip = new AddressableLED(GeneralConstants.LED_PWM_PORT);
@@ -129,6 +133,10 @@ public class RobotStatusManager {
 
         if (currentStatus == RobotStatus.Nothing) {
             updateMovingPixelEffect();
+            return;
+        }
+        if (currentStatus == RobotStatus.Test_Mode) {
+            m_PidDebugger.setSparkPIDControllerToDashboard("ankle", 0,0,0,0,0,0);
             return;
         }
 
