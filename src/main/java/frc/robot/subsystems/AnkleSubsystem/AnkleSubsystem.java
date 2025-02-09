@@ -20,6 +20,7 @@ public class AnkleSubsystem extends SubsystemBase {
   private SparkClosedLoopController closedLoopController;
   private SparkMaxConfig motorConfig;
   private RelativeEncoder encoder;
+  private double currentAngle;
   public double kP, kI, kD, kIz, kMaxOutput, kMinOutput;
 
   public AnkleSubsystem() {
@@ -35,6 +36,7 @@ public class AnkleSubsystem extends SubsystemBase {
 
   public void setAngle(double angle) {
     if (isAngleInRange(angle)) {
+      currentAngle = angle;
       closedLoopController.setReference(angle * AnkleConstants.gearRatio, ControlType.kMAXMotionPositionControl,
           ClosedLoopSlot.kSlot0);
     } else {
@@ -55,6 +57,7 @@ public class AnkleSubsystem extends SubsystemBase {
   public void setDefault() {
     closedLoopController.setReference(0, ControlType.kMAXMotionPositionControl,
         ClosedLoopSlot.kSlot0);
+        currentAngle = 0;
     if (encoder.getPosition() == 0) {
       stopAngleMotor();
     }
@@ -75,6 +78,7 @@ public class AnkleSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     encoder.setPosition(0);
+    SmartDashboard.putNumber("Current Angle (Ankle)", currentAngle);
     // This method will be called once per scheduler run
   }
 
