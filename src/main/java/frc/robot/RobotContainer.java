@@ -67,7 +67,11 @@ public class RobotContainer {
         driverController.button(5).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         driverController.button(10).onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverController.button(4).whileTrue(drivebase.centerModulesCommand());
-
+        if(DriverStation.isTest()) {
+        // todo Arm / Ankle test code will add 
+        } else {
+            // todo all codes will be here
+        }
         //driverController.button(3).whileTrue(drivebase.pa); Go barge command
     }
 
