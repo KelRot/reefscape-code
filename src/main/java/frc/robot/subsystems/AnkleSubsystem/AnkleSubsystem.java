@@ -31,7 +31,7 @@ public class AnkleSubsystem extends SubsystemBase {
     motorConfig = new SparkMaxConfig();
     configureMotorConfig(motorConfig);
     m_motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
+    encoder.setPosition(0);
   }
 
   public void setAngle(double angle) {
@@ -77,7 +77,6 @@ public class AnkleSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    encoder.setPosition(0);
     SmartDashboard.putNumber("Current Angle (Ankle)", currentAngle);
     // This method will be called once per scheduler run
   }
@@ -105,6 +104,7 @@ public class AnkleSubsystem extends SubsystemBase {
         .maxVelocity(1000)
         .maxAcceleration(1000)
         .allowedClosedLoopError(1);
+        motorConfig.smartCurrentLimit(50);
   }
 
 }
