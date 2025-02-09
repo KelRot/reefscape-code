@@ -5,11 +5,16 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Drive.Swerve;
 import java.io.File;
@@ -63,7 +68,8 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        drivebase.setDefaultCommand(Robot.isSimulation() ? driveFieldOrientedAnglularVelocityKeyboard : driveFieldOrientedAnglularVelocity);
+        drivebase.setDefaultCommand(
+                Robot.isSimulation() ? driveFieldOrientedAnglularVelocityKeyboard : driveFieldOrientedAnglularVelocity);
         driverController.button(5).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         driverController.button(10).onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverController.button(4).whileTrue(drivebase.centerModulesCommand());
