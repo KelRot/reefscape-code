@@ -30,7 +30,7 @@ public class Arm extends SubsystemBase {
     }
 
     // Arm'ı belirli bir açıya ayarlama fonksiyonu
-    public void setAngle(double angle) {
+    private void setAngle(double angle) {
         if (isAngleInRange(angle)) {
             currentAngle = angle;
 
@@ -40,13 +40,13 @@ public class Arm extends SubsystemBase {
     }
 
     // Test için arm'ı sabit bir açıya ayarlama
-    public void setAngleTest() {
+    private void setAngleTest() {
         double testAngle = SmartDashboard.getNumber("testAngle", 0);
         setAngle(testAngle);
     }
 
     // Varsayılan pozisyona geri dönme (0 derece)
-    public void setDefault() {
+    private void setDefault() {
         setAngle(ArmConstants.defaultAngle);
     }
 
@@ -71,7 +71,7 @@ public class Arm extends SubsystemBase {
         // This method will be called once per scheduler run during simulation
     }
 
-    public void configureMotorConfig(SparkMaxConfig motorConfig) {
+    private void configureMotorConfig(SparkMaxConfig motorConfig) {
     String prefix = "arm";
     double kP = SmartDashboard.getNumber(prefix + "P", ArmConstants.kP);
     double kI = SmartDashboard.getNumber(prefix + "I", ArmConstants.kI);
