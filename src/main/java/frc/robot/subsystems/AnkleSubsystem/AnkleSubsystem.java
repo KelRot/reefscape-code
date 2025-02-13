@@ -1,0 +1,111 @@
+package frc.robot.subsystems.AnkleSubsystem;
+
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class AnkleSubsystem extends SubsystemBase {
+  private SparkMax m_motor;
+  private WPI_VictorSPX m_wheelMotor;
+  private SparkClosedLoopController closedLoopController;
+  private SparkMaxConfig motorConfig;
+  private RelativeEncoder encoder;
+  private double currentAngleSetpoint;
+  private double kP, kI, kD, kIz, kMaxOutput, kMinOutput;
+
+  public AnkleSubsystem() {
+    m_motor = new SparkMax(AnkleConstants.SparkID, MotorType.kBrushless);
+    m_wheelMotor = new WPI_VictorSPX(AnkleConstants.RedlineID);
+    encoder = m_motor.getEncoder();
+    closedLoopController = m_motor.getClosedLoopController();
+    motorConfig = new SparkMaxConfig();
+    m_motor.configure(configCreator(motorConfig), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    encoder.setPosition(0);
+  }
+
+  private void setAngle(double angle) {
+    if (isAngleInRange(angle)) {
+      currentAngleSetpoint = angle;
+      closedLoopController.setReference(angle * AnkleConstants.gearRatio, ControlType.kMAXMotionPositionControl,
+          ClosedLoopSlot.kSlot0);
+    } else {
+      setDefault();
+    }
+  }
+
+  private void setAngleTest() {
+    double angle = SmartDashboard.getNumber("testAngleAnkle", 0);
+    if (isAngleInRange(angle)) {
+      closedLoopController.setReference(angle  * AnkleConstants.gearRatio, ControlType.kMAXMotionPositionControl,
+          ClosedLoopSlot.kSlot0);
+    } else {
+      setDefault();
+    }
+  }
+
+  private void setDefault() {
+    closedLoopController.setReference(0, ControlType.kMAXMotionPositionControl,
+        ClosedLoopSlot.kSlot0);
+        currentAngleSetpoint = 0;
+    if (encoder.getPosition() == 0) {
+      stopAngleMotor();
+    }
+  }
+
+  private boolean isAngleInRange(double angle) {
+    return angle <= AnkleConstants.maxAngle && angle >= AnkleConstants.minAngle;
+  }
+
+  private void stopAngleMotor() {
+    m_motor.set(0);
+  }
+
+  private void setWheelMotor(double velocity) {
+    m_wheelMotor.set(velocity);
+  }
+
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("Current Angle (Ankle)", currentAngleSetpoint);
+    // This method will be called once per scheduler run
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // This method will be called once per scheduler run during simulation
+  }
+
+  private SparkMaxConfig configCreator(SparkMaxConfig motorConfig) {
+    String prefix = "ankle";
+    double kP = SmartDashboard.getNumber(prefix + "P", AnkleConstants.kP);
+    double kI = SmartDashboard.getNumber(prefix + "I", AnkleConstants.kI);
+    double kD = SmartDashboard.getNumber(prefix + "D", AnkleConstants.kD);
+    double kMinOutput = SmartDashboard.getNumber(prefix + "MinOutput", AnkleConstants.MinOutput);
+    double kMaxOutput = SmartDashboard.getNumber(prefix + "MaxOutput", AnkleConstants.MaxOutput);
+    motorConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(kP)
+        .i(kI)
+        .d(kD)
+        .outputRange(kMinOutput, kMaxOutput);
+
+    motorConfig.closedLoop.maxMotion
+        .maxVelocity(1000)
+        .maxAcceleration(1000)
+        .allowedClosedLoopError(1);
+        motorConfig.smartCurrentLimit(50);
+
+        return motorConfig;
+  }
+
+}

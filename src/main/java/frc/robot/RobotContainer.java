@@ -38,8 +38,8 @@ public class RobotContainer {
 
     
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-            () -> driverController.getLeftY() * -1,
-            () -> driverController.getLeftX() * -1)
+            () -> driverController.getLeftY(),
+            () -> driverController.getLeftX())
             .withControllerRotationAxis(driverController::getRightX)
             .deadband(OperatorConstants.DEADBAND)
             .scaleTranslation(0.8)
@@ -73,6 +73,11 @@ public class RobotContainer {
         driverController.button(5).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         driverController.button(10).onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverController.button(4).whileTrue(drivebase.centerModulesCommand());
+        driverController.button(2).whileTrue(
+          drivebase.driveToPose(
+              new Pose2d(new Translation2d(7, 4), Rotation2d.fromDegrees(0)))
+                              );
+        driverController.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
         //driverController.button(3).whileTrue(drivebase.pa); Go barge command
     }
 
