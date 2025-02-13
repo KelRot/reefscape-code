@@ -40,7 +40,7 @@ public class RobotStatusManager {
     private static final int LED_LENGTH = GeneralConstants.LED_LENGTH;
 
     public RobotStatusManager() {
-        this.currentStatus = RobotStatus.Alignment;
+        this.currentStatus = RobotStatus.Climbing;
 
         // LED Şeridi Baslat
         ledStrip = new AddressableLED(GeneralConstants.LED_PWM_PORT);

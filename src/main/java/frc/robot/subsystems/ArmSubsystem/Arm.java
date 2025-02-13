@@ -23,8 +23,7 @@ public class Arm extends SubsystemBase {
         followerMotorConfig = new SparkMaxConfig();
         m_motorConfig = new SparkMaxConfig();
         followerMotorConfig.follow(m_motor);
-        configureMotorConfig(m_motorConfig);
-        m_motor.configure(m_motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_motor.configure(configCreator(m_motorConfig), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_followerMotor.configure(followerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         currentAngle = 0;
     }
@@ -71,7 +70,7 @@ public class Arm extends SubsystemBase {
         // This method will be called once per scheduler run during simulation
     }
 
-    private void configureMotorConfig(SparkMaxConfig motorConfig) {
+    private SparkMaxConfig configCreator(SparkMaxConfig motorConfig) {
     String prefix = "arm";
     double kP = SmartDashboard.getNumber(prefix + "P", ArmConstants.kP);
     double kI = SmartDashboard.getNumber(prefix + "I", ArmConstants.kI);
@@ -89,6 +88,7 @@ public class Arm extends SubsystemBase {
         .maxVelocity(1000)
         .maxAcceleration(1000)
         .allowedClosedLoopError(1);
+        return motorConfig;
   }
 
 }
