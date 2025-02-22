@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.RobotStatusManager;
 import frc.robot.subsystems.Drive.SwerveConstants;
+import frc.robot.utils.TestMode;
 
 /**
  * The methods in this class are called automatically corresponding to each
@@ -25,6 +26,7 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
   private Timer disabledTimer;
   private static Robot   instance;
+  private TestMode testMode;
   /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
@@ -56,6 +58,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     statusManager = new RobotStatusManager();
     m_robotContainer = new RobotContainer();
+    testMode = new TestMode();
 
     // Create a timer to disable motor brake a few seconds after disable. This will
     // let the robot stop
@@ -78,6 +81,7 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     statusManager.periodic();
+    testMode.periodic();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
