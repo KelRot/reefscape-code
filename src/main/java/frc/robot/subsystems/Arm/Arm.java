@@ -48,7 +48,7 @@ public class Arm extends SubsystemBase {
         masterMotorConfig = new SparkMaxConfig();
         followerMotorConfig = new SparkMaxConfig();
         masterMotorConfig.smartCurrentLimit(40).idleMode(IdleMode.kBrake).voltageCompensation(12).closedLoop
-                .pid(0.05, 0, 0).feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder).outputRange(-0.9, 0.9);
+                .pid(ArmConstants.sparkKP, ArmConstants.sparkKI, ArmConstants.sparkKD).feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder).outputRange(-0.9, 0.9);
         masterMotorConfig.closedLoop.maxMotion.maxVelocity(ArmConstants.maxRPM)
                 .maxAcceleration(ArmConstants.maxAccelaration)
                 .allowedClosedLoopError(ArmConstants.allowedClosedLoopError.in(Rotations));
@@ -118,6 +118,7 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
+        
     }
 
     @Override

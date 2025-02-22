@@ -5,7 +5,7 @@ import frc.robot.subsystems.Arm.ArmConstants;
 
 public class TestMode {
 
-    public void testMode() {
+    public TestMode() {
         SmartDashboard.putBoolean("testMode", false);
     }
 

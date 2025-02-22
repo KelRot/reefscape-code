@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.Arm.Arm;
+import frc.robot.subsystems.Climb.Climb;
 import frc.robot.subsystems.Drive.Swerve;
 import frc.robot.subsystems.Wrist.Wrist;
 
@@ -27,6 +29,8 @@ public class RobotContainer {
     private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(),
             "swerve"));
     private final Wrist m_Wrist = new Wrist();
+    private final Arm m_Arm = new Arm();
+    private final Climb m_Climb = new Climb();
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
             () -> driverController.getLeftY(),

@@ -1,5 +1,9 @@
 package frc.robot.subsystems.Wrist;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -9,68 +13,62 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Arm.ArmConstants;
+import frc.robot.utils.RobotMath.ArmMath;
+import frc.robot.utils.RobotMath.WristMath;
 
 public class Wrist extends SubsystemBase {
-  private SparkMax m_motor;
+  private SparkMax masterMotor;
   private WPI_VictorSPX m_wheelMotor;
   private double speed;
   private SparkClosedLoopController closedLoopController;
-  private SparkMaxConfig motorConfig;
+  private SparkMaxConfig masterMotorConfig;
   private RelativeEncoder encoder;
   private double currentAngleSetpoint;
+  private final MutAngle m_angle;
+  private final MutAngularVelocity m_velocity;;
 
   public Wrist() {
-    m_motor = new SparkMax(WristConstants.SparkID, MotorType.kBrushless);
-    m_wheelMotor = new WPI_VictorSPX(WristConstants.RedlineID);
-    encoder = m_motor.getEncoder();
-    closedLoopController = m_motor.getClosedLoopController();
-    motorConfig = new SparkMaxConfig();
-    m_motor.configure(configCreator(motorConfig), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    encoder.setPosition(WristConstants.defaultAngle);
-    speed = 0.5;
+    masterMotor = new SparkMax(ArmConstants.masterNeoID, MotorType.kBrushless);
+    masterMotorConfig = new SparkMaxConfig();
+    masterMotorConfig.smartCurrentLimit(40).idleMode(IdleMode.kBrake).voltageCompensation(12).closedLoop
+        .pid(WristConstants.sparkKP, WristConstants.sparkKI, WristConstants.sparkKD)
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder).outputRange(-0.9, 0.9);
+    masterMotorConfig.closedLoop.maxMotion.maxVelocity(WristConstants.maxRPM)
+        .maxAcceleration(WristConstants.maxAccelaration)
+        .allowedClosedLoopError(WristConstants.allowedClosedLoopError.in(Rotations));
+    masterMotor.configure(masterMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_angle = Rotations.mutable(0);
+    m_velocity = RPM.mutable(0);
   }
 
-  public void setAngle(double angle) {
-    if (isAngleInRange(angle)) {
-      currentAngleSetpoint = angle;
-      closedLoopController.setReference(angle * WristConstants.gearRatio, 
-                                       ControlType.kMAXMotionPositionControl, 
-                                       ClosedLoopSlot.kSlot0);
-    } else {
-      setDefault();
-    }
-  }
-
-  public void setAngleTest() {
-    double angle = SmartDashboard.getNumber("testAngleAnkle", 0);
-    if (isAngleInRange(angle)) {
-      closedLoopController.setReference(angle, ControlType.kMAXMotionPositionControl,
-          ClosedLoopSlot.kSlot0);
-    } else {
-      setDefault();
-    }
+  public void reachSetPoint(double angle) {
+    double goalPosition = WristMath.convertWristAngleToSensorUnits(Degrees.of(angle)).in(Rotations);
+    closedLoopController.setReference(goalPosition, ControlType.kMAXMotionPositionControl,
+        ClosedLoopSlot.kSlot0);
   }
 
   public void setDefault() {
-    closedLoopController.setReference(WristConstants.defaultAngle, ControlType.kMAXMotionPositionControl,
+    double goalPosition = ArmMath.convertArmAngleToSensorUnits(Degrees.of(0)).in(Rotations);
+    closedLoopController.setReference(goalPosition, ControlType.kMAXMotionPositionControl,
         ClosedLoopSlot.kSlot0);
-    currentAngleSetpoint = 0;
-    if (encoder.getPosition() == WristConstants.defaultAngle) {
-      stopAngleMotor();
-    }
   }
-
-  public boolean isAngleInRange(double angle) {
-    return angle <= WristConstants.maxAngle && angle >= WristConstants.minAngle;
-  }
-
 
   public void stopAngleMotor() {
-    m_motor.set(0);
+    masterMotor.set(0);
   }
 
   /*
@@ -89,28 +87,4 @@ public class Wrist extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
-
-  private SparkMaxConfig configCreator(SparkMaxConfig motorConfig) {
-    String prefix = "ankle";
-    double kP = SmartDashboard.getNumber(prefix + "P", WristConstants.kP);
-    double kI = SmartDashboard.getNumber(prefix + "I", WristConstants.kI);
-    double kD = SmartDashboard.getNumber(prefix + "D", WristConstants.kD);
-    double kMinOutput = SmartDashboard.getNumber(prefix + "MinOutput", WristConstants.MinOutput);
-    double kMaxOutput = SmartDashboard.getNumber(prefix + "MaxOutput", WristConstants.MaxOutput);
-    motorConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(kP)
-        .i(kI)
-        .d(kD)
-        .outputRange(kMinOutput, kMaxOutput);
-
-    motorConfig.closedLoop.maxMotion
-        .maxVelocity(1000)
-        .maxAcceleration(1000)
-        .allowedClosedLoopError(1);
-    motorConfig.smartCurrentLimit(40);
-
-    return motorConfig;
-  }
-
 }
