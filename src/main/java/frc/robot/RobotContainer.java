@@ -10,33 +10,24 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Drive.Swerve;
+import frc.robot.subsystems.Wrist.Wrist;
+
 import java.io.File;
 import swervelib.SwerveInputStream;
 
-/**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a "declarative" paradigm, very
- * little robot logic should actually be handled in the {@link Robot} periodic
- * methods (other than the scheduler calls).
- * Instead, the structure of the robot (including subsystems, commands, and
- * trigger mappings) should be declared here.
- */
 public class RobotContainer {
 
-    // Replace with CommandPS4Controller or CommandJoystick if needed
     final CommandXboxController driverController = new CommandXboxController(0);
-    // The robot's subsystems and commands are defined here...
+
     private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(),
             "swerve"));
+    private final Wrist m_Wrist = new Wrist();
 
-    
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
             () -> driverController.getLeftY(),
             () -> driverController.getLeftX())
@@ -52,11 +43,10 @@ public class RobotContainer {
             .deadband(OperatorConstants.DEADBAND)
             .scaleTranslation(0.8)
             .allianceRelativeControl(true);
-    // Derive the heading axis with math!
-
 
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -65,6 +55,7 @@ public class RobotContainer {
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
         NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+
     }
 
     private void configureBindings() {
@@ -74,11 +65,11 @@ public class RobotContainer {
         driverController.button(10).onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverController.button(4).whileTrue(drivebase.centerModulesCommand());
         driverController.button(2).whileTrue(
-          drivebase.driveToPose(
-              new Pose2d(new Translation2d(7, 4), Rotation2d.fromDegrees(0)))
-                              );
+                                                     drivebase.driveToPose(new Pose2d
+                                                     (new Translation2d(7, 4), 
+                                                     Rotation2d.fromDegrees(0))));
         driverController.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
-        //driverController.button(3).whileTrue(drivebase.pa); Go barge command
+        driverController.button(3).whileTrue(drivebase.driveToPose(drivebase.getPose()));
     }
 
     public Command getAutonomousCommand() {
