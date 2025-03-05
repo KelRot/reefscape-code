@@ -2,57 +2,50 @@ package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Arm.ArmConstants;
+import frc.robot.subsystems.Wrist.WristConstants;
 
 public class TestMode {
 
     public TestMode() {
-        SmartDashboard.putBoolean("testMode", false);
-    }
-
-    public void ArmPIDConstants() {
-        boolean isOn = SmartDashboard.getBoolean("isRioPIDController", false);
-        if (isOn) {
-            SmartDashboard.putNumber("armKp", ArmConstants.rioKP);
-            SmartDashboard.putNumber("armKi", ArmConstants.rioKI);
-            SmartDashboard.putNumber("armKd", ArmConstants.rioKD);
-            SmartDashboard.clearPersistent("armKPspark");
-            SmartDashboard.clearPersistent("armKIsparkarmKIspark");
-            SmartDashboard.clearPersistent("armKDspark");
-        } else {
-            SmartDashboard.putNumber("armKPspark", ArmConstants.sparkKP);
-            SmartDashboard.putNumber("armKIspark", ArmConstants.sparkKI);
-            SmartDashboard.putNumber("armKDspark", ArmConstants.sparkKD);
-            SmartDashboard.clearPersistent("armKp");
-            SmartDashboard.clearPersistent("armKi");
-            SmartDashboard.clearPersistent("armKd");
-
-        }
-    }
-
-    public void WristPIDConstants() {
-        SmartDashboard.putNumber("wristKPspark", ArmConstants.sparkKP);
-        SmartDashboard.putNumber("wristKIspark", ArmConstants.sparkKI);
-        SmartDashboard.putNumber("wristKDspark", ArmConstants.sparkKD);
-    }
-
-    public void clearConstants() {
-        SmartDashboard.clearPersistent("armKPspark");
-        SmartDashboard.clearPersistent("armKIsparkarmKIspark");
-        SmartDashboard.clearPersistent("armKDspark");
-        SmartDashboard.clearPersistent("armKp");
-        SmartDashboard.clearPersistent("armKi");
-        SmartDashboard.clearPersistent("armKd");
-        SmartDashboard.clearPersistent("wristKPspark");
-        SmartDashboard.clearPersistent("wristKIsparkarmKIspark");
-        SmartDashboard.clearPersistent("wristKDspark");
-    }
-    public void periodic() {
-        boolean testMode = SmartDashboard.getBoolean("testMode", false);
+        SmartDashboard.putBoolean("testMode", true);
+        SmartDashboard.putBoolean("isRioPIDController", true);
+        boolean testMode = SmartDashboard.getBoolean("testMode", true);
         if (testMode) {
             ArmPIDConstants();
             WristPIDConstants();
-        } else {
-            clearConstants();
+            MotorDebugValues();
         }
+        SmartDashboard.putBoolean("isRioPIDController", true);
     }
+
+    public void ArmPIDConstants() {
+        boolean isOn = SmartDashboard.getBoolean("isRioPIDController", true);
+        if (isOn) {
+            SmartDashboard.putNumber("Arm/RioKP", ArmConstants.rioKP);
+            SmartDashboard.putNumber("Arm/RioKI", ArmConstants.rioKI);
+            SmartDashboard.putNumber("Arm/RioKD", ArmConstants.rioKD);
+        } else {
+            SmartDashboard.putNumber("Arm/SparkKP", ArmConstants.sparkKP);
+            SmartDashboard.putNumber("Arm/SparkKI", ArmConstants.sparkKI);
+            SmartDashboard.putNumber("Arm/SparkKD", ArmConstants.sparkKD);
+
+        }
+
+        SmartDashboard.putNumber("Arm/TestAngle", 0);
+    }
+
+    public void WristPIDConstants() {
+        SmartDashboard.putNumber("wrist/SparkKP", WristConstants.sparkKP);
+        SmartDashboard.putNumber("Wrist/SparkKP", WristConstants.sparkKI);
+        SmartDashboard.putNumber("Wrist/SparkKP", WristConstants.sparkKD);
+    }
+
+    public void MotorDebugValues() {
+        SmartDashboard.putNumber("Climb/Opener Set", 0);
+        SmartDashboard.putNumber("Climb/Closer Set", 0);
+        SmartDashboard.putNumber("Wrist/Debug Voltage", 0);
+        SmartDashboard.putNumber("Arm/Debug Voltage", 0);
+    }
+
+    
 }

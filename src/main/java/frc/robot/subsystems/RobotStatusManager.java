@@ -27,7 +27,7 @@ public class RobotStatusManager {
             this.blinking = blinking;
         }
     }
-
+    
     private RobotStatus currentStatus;
     private final AddressableLED ledStrip;
     private final AddressableLEDBuffer ledBuffer;
