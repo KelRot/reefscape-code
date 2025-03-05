@@ -17,8 +17,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.BackShootLevel3;
-import frc.robot.commands.FrontLevel3Reach;
-import frc.robot.commands.Level2Reach;
+import frc.robot.commands.IntakeCmd;
 import frc.robot.commands.ShootLevel2;
 import frc.robot.subsystems.Arm.Arm;
 import frc.robot.subsystems.Climb.Climb;
@@ -40,9 +39,8 @@ public class RobotContainer {
 
         private final BackShootLevel3 backShootLevel3 = new BackShootLevel3(arm, wrist);
         private final ShootLevel2 shootLevel2 = new ShootLevel2(arm, wrist);
+        private final IntakeCmd IntakeCmd = new IntakeCmd(arm, wrist);
         
-        private final Level2Reach level2reach = new Level2Reach(arm);
-        private final FrontLevel3Reach frontLevel3Reach = new FrontLevel3Reach(arm);
         
 
 
@@ -98,7 +96,7 @@ public class RobotContainer {
                 // Configure the trigger bindings
                 configureBindings();
                 DriverStation.silenceJoystickConnectionWarning(true);
-                NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+                NamedCommands.registerCommand("ShootLevel2", shootLevel2);
 
         }
 
@@ -111,8 +109,8 @@ public class RobotContainer {
                 driverController.button(10).onTrue((Commands.runOnce(drivebase::zeroGyro)));
                 driverController.button(4).whileTrue(drivebase.centerModulesCommand());
                 driverController.button(6).toggleOnTrue(shootLevel2);
-                driverController.button(7).toggleOnTrue(frontLevel3Reach);
-                arm.setDefaultCommand(new InstantCommand(() -> arm.Hold()));
+                driverController.button(7).toggleOnTrue(backShootLevel3);
+                driverController.button(1).toggleOnTrue(IntakeCmd);
                 // driverController.button(2).whileTrue(
                 /// drivebase.driveToPose(new Pose2d(new Translation2d(7, 4),
                 // Rotation2d.fromDegrees(0))));

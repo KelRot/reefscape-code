@@ -1,8 +1,11 @@
 package frc.robot.commands;
 
+
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import frc.robot.Constants;
 import frc.robot.subsystems.Arm.*;
 import frc.robot.subsystems.Wrist.*;
 
@@ -18,11 +21,14 @@ public class BackShootLevel3 extends SequentialCommandGroup {
     addRequirements(m_arm, m_wrist);
 
     addCommands(
-    new BackLevel3Reach(m_armsub),
-    new WaitCommand(0.15),
+    new InstantCommand(() -> m_armsub.setSetPoint(Constants.LevelAngles.BackLevel3)),
+    //new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.BackLevel3Wrist)),
+    new WaitCommand(0.5),
     new InstantCommand(() -> m_wristsub.setWheelMotor(9)),
-    new WaitCommand(0.2),
-    new InstantCommand(() -> m_wristsub.setWheelMotor(0))
+    new WaitCommand(0.4),
+    new InstantCommand(() -> m_wristsub.setWheelMotor(0)),
+    new InstantCommand(() -> m_armsub.setSetPoint(Constants.LevelAngles.DefaultAngle))
+    //new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))
     );
 
   }

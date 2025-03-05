@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 
 import java.io.ObjectOutputStream.PutField;
+import java.rmi.MarshalException;
 
 import org.opencv.core.Mat;
 
@@ -66,13 +67,8 @@ public class Arm extends SubsystemBase {
         quadEncoder = new Encoder(0, 1, false, EncodingType.k4X);
         quadEncoder.reset();
         quadEncoder.setDistancePerPulse(0.6);
+        SmartDashboard.putNumber("Arm/SetPoint", getAngle());
     }
-
-    public void Hold() {
-        masterMotor.setVoltage(getFeedForward(getAngle()));
-    }
-
-
 
     public void reachSetPoint(double angle) { 
         if (isRioPIDController)
@@ -90,11 +86,13 @@ public class Arm extends SubsystemBase {
        //   closedLoopController.setReference(angle,
        //                             ControlType.kPosition, ClosedLoopSlot.kSlot0, getFeedForward(getAngle()));
         }
-
     }
     public double getFeedForward(double angleInDegrees) { // Calculates The Feed Forward Value
         double direction = angleInDegrees > 0 ? -1 : 1;
         return direction * (0.738 * Math.abs(Math.sin(Math.toRadians(Math.abs(angleInDegrees)))));
+    }
+    public void setSetPoint(double Angle) {
+        SmartDashboard.putNumber("Arm/SetPoint", Angle);
     }
 
     public double getAngle() { // Get Angle Value From Encoders
@@ -129,6 +127,12 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putNumber("Arm/Neo Encoder", masterEncoder.getPosition());
         SmartDashboard.putNumber("voltage", lastOutput + getFeedForward(getAngle()));
         SmartDashboard.putNumber("Applied Voltage", masterMotor.get());
+        if (SmartDashboard.getNumber("Arm/Debug Voltage", 0) != 0) {
+         setVoltage();
+        } else {
+            double angle = SmartDashboard.getNumber("Arm/SetPoint", 0);
+            reachSetPoint(angle);
+        }
         pidController = refreshPidController();
         System.out.println(pidController.getP());
         System.out.println(pidController.getI());

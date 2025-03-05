@@ -35,9 +35,10 @@ public class TestMode {
     }
 
     public void WristPIDConstants() {
-        SmartDashboard.putNumber("wrist/SparkKP", WristConstants.sparkKP);
-        SmartDashboard.putNumber("Wrist/SparkKP", WristConstants.sparkKI);
-        SmartDashboard.putNumber("Wrist/SparkKP", WristConstants.sparkKD);
+        SmartDashboard.putNumber("Wrist/RioKP", WristConstants.rioKP);
+        SmartDashboard.putNumber("Wrist/RioKI", WristConstants.rioKI);
+        SmartDashboard.putNumber("Wrist/RioKD", WristConstants.rioKD);
+        SmartDashboard.putNumber("Wrist/SetPoint", -12);
     }
 
     public void MotorDebugValues() {

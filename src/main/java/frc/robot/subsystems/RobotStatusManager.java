@@ -10,11 +10,11 @@ public class RobotStatusManager {
     public enum RobotStatus {
         Alignment(255,0,0, true), // Blinking Red
         CountDown_Intake(0, 255, 0, true),
-        Has_Coral(0,255,0, false), // Blinking Green 
+        Has_Coral(0,255,0, false), 
         ShootingL1(255, 0, 255, true),     // Blinking Purple
         ShootingL2(0, 0, 255, true),       // Blinking Blue
         ShootingL3(255, 0, 0, true),       // Blinking Red
-        Removing_Algae(0, 255, 0, true),    // Blinking Green
+        Removing_Algae(0, 255, 0, true),    // Blinking Green // Blinking Green
         Climbing(0, 0, 0, false),          // Rainbow
         Nothing(0, 0, 0, false);           // Sliding 
         public final int r, g, b;
