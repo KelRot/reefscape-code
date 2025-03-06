@@ -18,9 +18,11 @@ public final class Constants {
     public static final int Level1 = -75;
     public static final int Level2 = -68;
     public static final int FrontLevel3 = -20; 
-    public static final int BackLevel3 = -5;
+    public static final int BackLevel3 = -3;
     public static final double DefaultAngle = -82.65;
     public static final double DefaultAngleWrist = -12;
-    public static final double BackLevel3Wrist = 0;
+    public static final double BackLevel3Wrist = -12;
+    public static final double BackAlgaeRemover = 0;
+    public static final double BackAlgaeRemoverWrist = 0;
   }
 }

@@ -30,13 +30,13 @@ public class IntakeCmd extends Command {
         m_wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist);
         if(m_wrist.getSensor()) {
             m_finished = false;
-            m_wrist.setWheelMotor(4);
+            m_wrist.setWheelMotor(5.3);
         } else { 
             if(!timeron) {
             m_timer.reset();
             m_timer.start();
             timeron=true;
-        } else if (m_timer.get() > 0.07) {
+        } else if (m_timer.get() > 0.12) {
             m_wrist.setWheelMotor(0);
             m_finished = true;
             }

@@ -105,7 +105,7 @@ public class Swerve extends SubsystemBase {
                                             // simulations since it causes discrepancies not seen in real life.
     swerveDrive.setAngularVelocityCompensation(true,
         true,
-        0.1); // Correct for skew that gets worse as angular velocity increases. Start with a
+        0.13); // Correct for skew that gets worse as angular velocity increases. Start with a
               // coefficient of 0.1.
     swerveDrive.setModuleEncoderAutoSynchronize(true,
         0.8); // Enable if you want to resynchronize your absolute encoders and motor encoders
@@ -147,7 +147,6 @@ public class Swerve extends SubsystemBase {
 
   @Override
   public void periodic() {
-    System.out.println(swerveDrive.getPose());
     // When vision is enabled we must manually update odometry in SwerveDrive
     if (visionDriveTest) {
       swerveDrive.updateOdometry();
@@ -246,6 +245,32 @@ public class Swerve extends SubsystemBase {
       }
     });
   }
+  public Command aimAtLeftCoral(Cameras camera) {
+
+    return run(() -> {
+      Optional<PhotonPipelineResult> resultO = camera.getBestResult();
+      if (resultO.isPresent()) {
+        var result = resultO.get();
+        if (result.hasTargets()) {
+          drive(getTargetSpeeds(0,
+              0,
+              Rotation2d.fromDegrees(result.getBestTarget()
+                  .getYaw()))); // Not sure if this will work, more math may be required.
+        }
+      }
+    });
+  }
+  public Command turn90degrees() {
+
+    return run(() -> {
+          drive(getTargetSpeeds(0,
+              0,
+              Rotation2d.fromDegrees(90))); // Not sure if this will work, more math may be required.
+        
+      }
+    );
+  }
+  
 
   /**
    * Get the path follower with events.

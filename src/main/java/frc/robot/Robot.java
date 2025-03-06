@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private RobotStatusManager statusManager;
   private RobotContainer m_robotContainer;
-  private Timer disabledTimer, matchTimer;
+  private Timer disabledTimer;
   private static Robot instance;
   private TestMode testMode;
 
@@ -121,7 +121,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    matchTimer.start();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)

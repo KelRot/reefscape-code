@@ -22,13 +22,16 @@ public class BackShootLevel3 extends SequentialCommandGroup {
 
     addCommands(
     new InstantCommand(() -> m_armsub.setSetPoint(Constants.LevelAngles.BackLevel3)),
-    //new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.BackLevel3Wrist)),
     new WaitCommand(0.5),
-    new InstantCommand(() -> m_wristsub.setWheelMotor(9)),
-    new WaitCommand(0.4),
+    new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.BackLevel3Wrist)),
+    new WaitCommand(0.9),
+    new InstantCommand(() -> m_wristsub.setWheelMotor(-9)),
+    new WaitCommand(0.3),
+    new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.DefaultAngleWrist)),
+    new WaitCommand(0.3),
     new InstantCommand(() -> m_wristsub.setWheelMotor(0)),
-    new InstantCommand(() -> m_armsub.setSetPoint(Constants.LevelAngles.DefaultAngle))
-    //new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))
+    new InstantCommand(() -> m_armsub.setSetPoint(Constants.LevelAngles.DefaultAngle)),
+    new InstantCommand(() -> m_wristsub.setSetPoint(Constants.LevelAngles.DefaultAngleWrist + 0.1))
     );
 
   }

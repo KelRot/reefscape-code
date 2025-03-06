@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.BackShootLevel3;
@@ -29,7 +31,8 @@ import swervelib.SwerveInputStream;
 
 public class RobotContainer {
 
-        final CommandXboxController driverController = new CommandXboxController(0);
+        final CommandPS5Controller driverController = new CommandPS5Controller(0);
+        final CommandPS4Controller operatorController = new CommandPS4Controller(0);
         private final Wrist wrist = new Wrist();
         private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(),
                         "swerve"));
@@ -46,9 +49,9 @@ public class RobotContainer {
 
 
         SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                        () -> driverController.getLeftY() * -1,
-                        () -> driverController.getLeftX() * -1)
-                        .withControllerRotationAxis(driverController::getRightX)
+                        () -> driverController.getLeftY(),
+                        () -> driverController.getLeftX() )
+                        .withControllerRotationAxis(() -> driverController.getRightX())
                         .deadband(OperatorConstants.DEADBAND)
                         .scaleTranslation(0.8)
                         .scaleRotation(0.7)
@@ -101,25 +104,26 @@ public class RobotContainer {
         }
 
         private void configureBindings() {
-                // drivebase.setDefaultCommand(
-                // Robot.isSimulation() ? driveFieldOrientedAnglularVelocityKeyboard :
-                // driveFieldOrientedAnglularVelocity);
                 drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
                 driverController.button(5).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-                driverController.button(10).onTrue((Commands.runOnce(drivebase::zeroGyro)));
-                driverController.button(4).whileTrue(drivebase.centerModulesCommand());
-                driverController.button(6).toggleOnTrue(shootLevel2);
-                driverController.button(7).toggleOnTrue(backShootLevel3);
-                driverController.button(1).toggleOnTrue(IntakeCmd);
-                // driverController.button(2).whileTrue(
-                /// drivebase.driveToPose(new Pose2d(new Translation2d(7, 4),
-                // Rotation2d.fromDegrees(0))));
-                driverController.button(8).whileTrue(new InstantCommand(() -> climb.openClimb()))
+                driverController.pov(0).whileTrue(drivebase.centerModulesCommand());
+                driverController.button(7).onTrue(IntakeCmd);
+                driverController.button(6).onTrue(shootLevel2);
+                driverController.button(8).onTrue(backShootLevel3);
+                driverController.button(1).whileTrue(new InstantCommand(() ->wrist.setWheelMotor(9))).whileFalse(new InstantCommand(() -> wrist.setWheelMotor(0)));
+                driverController.button(3).whileTrue(new InstantCommand(() ->wrist.setWheelMotor(-9))).whileFalse(new InstantCommand(() -> wrist.setWheelMotor(0)));
+                driverController.button(2).onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)).alongWith(new InstantCommand(() -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))));
+                
+
+                operatorController.button(8).onTrue((Commands.runOnce(drivebase::zeroGyro)));
+                operatorController.button(3).onTrue(new InstantCommand(() -> IntakeCmd.cancel()));
+                operatorController.button(4).whileTrue(new InstantCommand(() -> climb.openClimb()))
                                 .whileFalse(new InstantCommand(() -> climb.stopOpener()));
-                driverController.button(9).whileTrue(new InstantCommand(() -> climb.closeClimb()))
+                operatorController.button(1).whileTrue(new InstantCommand(() -> climb.closeClimb()))
                                 .whileFalse(new InstantCommand(() -> climb.stopCloser()));
-                // driverController.button(1).whileTrue(drivebase.sysIdAngleMotorCommand());
-                // driverController.button(3).onTrue(drivebase.driveToDistanceCommand(1, 3));
+                operatorController.button(2).onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)).alongWith(new InstantCommand(() -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))));
+                
+                
         }
 
         public Command getAutonomousCommand() {
