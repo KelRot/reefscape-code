@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
+import frc.robot.subsystems.RobotStatusManager;
+import frc.robot.subsystems.RobotStatusManager.RobotStatus;
 import frc.robot.subsystems.Arm.*;
 import frc.robot.subsystems.Wrist.*;
 
@@ -14,11 +16,13 @@ public class IntakeCmd extends Command {
     private final Arm m_arm;
     private final Wrist m_wrist;
     private final Timer m_timer;
+    private final RobotStatusManager robotStatusManager;
     private boolean timeron, m_finished;
-    public IntakeCmd(Arm arm, Wrist wrist) {
+    public IntakeCmd(Arm arm, Wrist wrist, RobotStatusManager m_robotStatusManager) {
         m_timer = new Timer();
         m_arm = arm;
         m_wrist = wrist;
+        robotStatusManager = m_robotStatusManager;
         timeron = false;
         m_finished = false;
         addRequirements(arm, wrist);
@@ -29,6 +33,7 @@ public class IntakeCmd extends Command {
         m_arm.setSetPoint(Constants.LevelAngles.DefaultAngle);
         m_wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist);
         if(m_wrist.getSensor()) {
+            robotStatusManager.setStatus(RobotStatus.CountDown_Intake);
             m_finished = false;
             m_wrist.setWheelMotor(5.3);
         } else { 
@@ -37,6 +42,7 @@ public class IntakeCmd extends Command {
             m_timer.start();
             timeron=true;
         } else if (m_timer.get() > 0.12) {
+            robotStatusManager.setStatus(RobotStatus.Has_Coral);
             m_wrist.setWheelMotor(0);
             m_finished = true;
             }

@@ -105,6 +105,8 @@ public class Robot extends TimedRobot {
     m_robotContainer.setMotorBrake(true);
     disabledTimer.reset();
     disabledTimer.start();
+    SmartDashboard.putNumber("Arm/SetPoint", Constants.LevelAngles.DefaultAngle);
+    SmartDashboard.putNumber("Wrist/SetPoint", Constants.LevelAngles.DefaultAngleWrist);
   }
 
   @Override

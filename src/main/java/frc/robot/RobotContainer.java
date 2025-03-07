@@ -5,22 +5,23 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.BackShootLevel3;
 import frc.robot.commands.IntakeCmd;
 import frc.robot.commands.ShootLevel2;
+import frc.robot.subsystems.RobotStatusManager;
 import frc.robot.subsystems.Arm.Arm;
 import frc.robot.subsystems.Climb.Climb;
 import frc.robot.subsystems.Drive.Swerve;
@@ -30,27 +31,24 @@ import java.io.File;
 import swervelib.SwerveInputStream;
 
 public class RobotContainer {
+        private final UsbCamera usbcam = CameraServer.startAutomaticCapture();
 
         final CommandPS5Controller driverController = new CommandPS5Controller(0);
-        final CommandPS4Controller operatorController = new CommandPS4Controller(0);
+        final CommandPS4Controller operatorController = new CommandPS4Controller(1);
         private final Wrist wrist = new Wrist();
         private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(),
                         "swerve"));
         private final Climb climb = new Climb();
         private final Arm arm = new Arm();
+        private final RobotStatusManager robotStatusManager = new RobotStatusManager();
 
-
-        private final BackShootLevel3 backShootLevel3 = new BackShootLevel3(arm, wrist);
-        private final ShootLevel2 shootLevel2 = new ShootLevel2(arm, wrist);
-        private final IntakeCmd IntakeCmd = new IntakeCmd(arm, wrist);
-        
-        
-
-
+        private final BackShootLevel3 backShootLevel3 = new BackShootLevel3(arm, wrist, robotStatusManager);
+        private final ShootLevel2 shootLevel2 = new ShootLevel2(arm, wrist, robotStatusManager);
+        private final IntakeCmd IntakeCmd = new IntakeCmd(arm, wrist, robotStatusManager);
 
         SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                        () -> driverController.getLeftY(),
-                        () -> driverController.getLeftX() )
+                        () -> driverController.getLeftY() * -1,
+                        () -> driverController.getLeftX() * -1)
                         .withControllerRotationAxis(() -> driverController.getRightX())
                         .deadband(OperatorConstants.DEADBAND)
                         .scaleTranslation(0.8)
@@ -62,6 +60,10 @@ public class RobotContainer {
                                         driverController::getRightY)
                         .headingWhile(true);
 
+        SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
+                        .allianceRelativeControl(false);
+
+        Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
         Command driveFieldOrientedDriectAngle = drivebase.driveFieldOriented(driveDirectAngle);
         Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
         Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
@@ -91,44 +93,68 @@ public class RobotContainer {
         Command driveFieldOrientedDirectAngleSim = drivebase.driveFieldOriented(driveDirectAngleSim);
 
         Command driveSetpointGenSim = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
+        private final SendableChooser<Command> m_Chooser = new SendableChooser<>();
 
         /**
          * The container for the robot. Contains subsystems, OI devices, and commands.
          */
         public RobotContainer() {
+                usbcam.setResolution(600, 400);
                 // Configure the trigger bindings
                 configureBindings();
                 DriverStation.silenceJoystickConnectionWarning(true);
                 NamedCommands.registerCommand("ShootLevel2", shootLevel2);
+                m_Chooser.setDefaultOption("Taxi", drivebase.getAutonomousCommand("Taxi"));
+                m_Chooser.addOption("Right-L2", drivebase.getAutonomousCommand("Right-L2"));
+                m_Chooser.addOption("Turn90", drivebase.getAutonomousCommand("Turn90"));
+                SmartDashboard.putData("Auto Selector", m_Chooser);
 
         }
 
         private void configureBindings() {
                 drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
-                driverController.button(5).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+                driverController.pov(90).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
                 driverController.pov(0).whileTrue(drivebase.centerModulesCommand());
                 driverController.button(7).onTrue(IntakeCmd);
                 driverController.button(6).onTrue(shootLevel2);
                 driverController.button(8).onTrue(backShootLevel3);
-                driverController.button(1).whileTrue(new InstantCommand(() ->wrist.setWheelMotor(9))).whileFalse(new InstantCommand(() -> wrist.setWheelMotor(0)));
-                driverController.button(3).whileTrue(new InstantCommand(() ->wrist.setWheelMotor(-9))).whileFalse(new InstantCommand(() -> wrist.setWheelMotor(0)));
-                driverController.button(2).onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)).alongWith(new InstantCommand(() -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))));
-                
-
-                operatorController.button(8).onTrue((Commands.runOnce(drivebase::zeroGyro)));
+                driverController.button(1).whileTrue(new InstantCommand(() -> wrist.setWheelMotor(9)))
+                                .whileFalse(new InstantCommand(() -> wrist.setWheelMotor(0)));
+                driverController.button(3).whileTrue(new InstantCommand(() -> wrist.setWheelMotor(-11)))
+                                .whileFalse(new InstantCommand(() -> wrist.setWheelMotor(0)));
+                driverController.button(2).onTrue(new InstantCommand(
+                                () -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle))
+                                .alongWith(new InstantCommand(
+                                                () -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))));
+                driverController.button(5).whileTrue(driveRobotOrientedAngularVelocity);
+                operatorController.pov(0).onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)));
+                operatorController.pov(90).onTrue(new InstantCommand(() -> backShootLevel3.cancel()));
+                operatorController.pov(180).onTrue(new InstantCommand(() -> wrist.resetAngle()));
+                operatorController.button(8).onTrue(new InstantCommand(() -> drivebase.zeroGyro()));
                 operatorController.button(3).onTrue(new InstantCommand(() -> IntakeCmd.cancel()));
                 operatorController.button(4).whileTrue(new InstantCommand(() -> climb.openClimb()))
                                 .whileFalse(new InstantCommand(() -> climb.stopOpener()));
                 operatorController.button(1).whileTrue(new InstantCommand(() -> climb.closeClimb()))
                                 .whileFalse(new InstantCommand(() -> climb.stopCloser()));
-                operatorController.button(2).onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)).alongWith(new InstantCommand(() -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))));
-                
-                
+                operatorController.button(2)
+                                .onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)));
+                operatorController.button(5).onTrue(new InstantCommand(
+                                () -> arm.setSetPoint(Constants.LevelAngles.BackLevel3))
+                                .alongWith(new InstantCommand(
+                                                () -> wrist.setSetPoint(Constants.LevelAngles.BackLevel3Wrist))));
+                operatorController.button(6).onTrue(new InstantCommand(
+                                () -> arm.setSetPoint(Constants.LevelAngles.Level2))
+                                .alongWith(new InstantCommand(
+                                                () -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngle))));
+                operatorController.button(7).onTrue(new InstantCommand(() -> arm.setSetPoint(20)));
+                operatorController.button(9).whileTrue(new InstantCommand(() -> climb.setCloser(-1)))
+                                .whileFalse(new InstantCommand(() -> climb.setCloser(0)));
+
         }
 
         public Command getAutonomousCommand() {
                 // An example command will be run in autonomous
-                return drivebase.getAutonomousCommand("New Auto");
+                return m_Chooser.getSelected();
         }
 
         public void setMotorBrake(boolean brake) {

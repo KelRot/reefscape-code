@@ -15,9 +15,9 @@ public class ArmConstants {
     public static final double MaxOutput = 1;
     public static final double MinOutput = -1;
     public static final double allowedClosedLoopError = 2;
-    public static double rioKP = 0.05;
+    public static double rioKP = 0.0454;
     public static double rioKI = 0;
-    public static double rioKD = 0.00001;
+    public static double rioKD = 0.000001;
     public static double maxRPM = 1000000000;
     public static double maxAccelaration = 100000000;
     public static double sparkKD = 0;

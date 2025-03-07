@@ -28,7 +28,7 @@ public class RobotStatusManager {
         }
     }
     
-    private RobotStatus currentStatus;
+    /*private RobotStatus currentStatus;
     private final AddressableLED ledStrip;
     private final AddressableLEDBuffer ledBuffer;
     private final Timer blinkTimer;
@@ -36,14 +36,14 @@ public class RobotStatusManager {
     private int movingPixelIndex = 0;
     private int movingPixelHue = 0;
     private boolean isBlinkOn = true;
-    private boolean ledSystemEnabled = true; // LED Sistemi Acık/Kapalı Durumu
+    private boolean ledSystemEnabled = true;
     private static final int LED_LENGTH = GeneralConstants.LED_LENGTH;
-
+*/
     public RobotStatusManager() {
-        this.currentStatus = RobotStatus.Climbing;
+       // this.currentStatus = RobotStatus.Climbing;
 
-        // LED Şeridi Baslat
-        ledStrip = new AddressableLED(GeneralConstants.LED_PWM_PORT);
+     
+       /*  ledStrip = new AddressableLED(GeneralConstants.LED_PWM_PORT);
         ledBuffer = new AddressableLEDBuffer(LED_LENGTH);
         ledStrip.setLength(LED_LENGTH);
         ledStrip.setData(ledBuffer);
@@ -55,15 +55,15 @@ public class RobotStatusManager {
         
         SmartDashboard.putBoolean("LED System", ledSystemEnabled);
     }
-
+    */}
     public void setStatus(RobotStatus newStatus) {
-        if (this.currentStatus != newStatus) { // Aynı duruma tekrar geçme
+       /*  if (this.currentStatus != newStatus) { 
             this.currentStatus = newStatus;
             SmartDashboard.putString("Robot Status", newStatus.name());
-        }
+        }*/
     }
 
-    public RobotStatus getStatus() {
+   /*  public RobotStatus getStatus() {
         return this.currentStatus;
     }
 
@@ -116,8 +116,8 @@ public class RobotStatusManager {
         }
         ledStrip.setData(ledBuffer);
     }
-
-    public void periodic() {
+*/
+    public void periodic() {/* 
         if (!ledSystemEnabled) {
             return; // LED Sistemi Kapalıysa Çalışma
         }
@@ -141,7 +141,7 @@ public class RobotStatusManager {
             } else {
                 updateLEDBuffer(0, 0, 0);
             }
-        }
+        }*/
     }
 }
 

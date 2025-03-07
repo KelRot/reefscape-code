@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.dyn4j.geometry.Vector2;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -38,6 +41,9 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
+
+import com.google.flatbuffers.Constants;
+
 import swervelib.SwerveDrive;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
@@ -82,6 +88,11 @@ public class Vision
    * @param currentPose Current pose supplier, should reference {@link SwerveDrive#getPose()}
    * @param field       Current field, should be {@link SwerveDrive#field}
    */
+
+  private final Transform2d v_left = new Transform2d(); // will be calculated
+  private final Transform2d v_right = new Transform2d();
+
+
   public Vision(Supplier<Pose2d> currentPose, Field2d field)
   {
     this.currentPose = currentPose;
@@ -242,6 +253,7 @@ public class Vision
     return tag.map(pose3d -> PhotonUtils.getDistanceToPose(currentPose.get(), pose3d.toPose2d())).orElse(-1.0);
   }
 
+
   /**
    * Get tracked target from a camera of AprilTagID
    *
@@ -339,22 +351,22 @@ public class Vision
      * Left Camera
      */
     BACK_CAM("back",
-             new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(30)),
-             new Translation3d(Units.inchesToMeters(12.056),
-                               Units.inchesToMeters(10.981),
-                               Units.inchesToMeters(8.44)),
-             VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+             new Rotation3d(0, Math.toRadians(0), Math.toRadians(0)),
+             new Translation3d(0,
+                               -0.20,
+                               0.37),
+             VecBuilder.fill(0,0,0), VecBuilder.fill(0,0,0)),
     /**
      * Right Camera
      */
     FRONT_CAM("front",
-              new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(-30)),
-              new Translation3d(Units.inchesToMeters(12.056),
-                                Units.inchesToMeters(-10.981),
-                                Units.inchesToMeters(8.44)),
+              new Rotation3d(0, 0, 0),
+              new Translation3d(0,
+                                0.28,
+                                0.29),
               VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
   
-
+  
     /**
      * Latency alert to use when high latency is detected.
      */
@@ -488,6 +500,29 @@ public class Vision
       return Optional.of(bestResult);
     }
 
+    public Optional<PhotonTrackedTarget> getFuckingBestTarget(){
+      if (resultsList.isEmpty())
+      {
+        return Optional.empty();
+      }
+
+      PhotonPipelineResult bestResult       = resultsList.get(0);
+      double               ambiguity         = bestResult.getBestTarget().getPoseAmbiguity();
+      double               currentAmbiguity = 0;
+      PhotonTrackedTarget bestttresult = bestResult.getBestTarget();
+      for (PhotonPipelineResult result : resultsList)
+      {
+        currentAmbiguity = result.getBestTarget().getPoseAmbiguity();
+        if (currentAmbiguity < ambiguity && currentAmbiguity > 0)
+        {
+          bestResult = result;
+          ambiguity = currentAmbiguity;
+          bestttresult = bestResult.getBestTarget();
+        }
+      }
+      return Optional.of(bestttresult);
+    }
+
     /**
      * Get the latest result from the current cache.
      *
@@ -497,6 +532,16 @@ public class Vision
     {
       return resultsList.isEmpty() ? Optional.empty() : Optional.of(resultsList.get(0));
     }
+
+  /*   public Transform2d get_dif(){  
+      var target = getFuckingBestTarget();
+      if(!target.isPresent()){
+        return new Transform2d();
+      }
+      double distanceMeters = PhotonUtils.calculateDistanceToTargetMeters(0.37, 0.31, 0, 0);
+      Transform2d translation = PhotonUtils.estimateCameraToTargetTranslation(distanceMeters, Rotation2d.fromDegrees(-target.get().getYaw()));
+      return translation;
+    } */
 
     /**
      * Get the estimated robot pose. Updates the current robot pose estimation, standard deviations, and flushes the
@@ -625,5 +670,11 @@ public class Vision
 
 
   }
+
+
+ /*  public Transform2d getPathToShootLeft(){
+    var robotToAprilTagPose = Cameras.BACK_CAM.get_dif();
+    return new Transform2d(robotToAprilTagPose.relativeTo(v_left));
+  } */
 
 }

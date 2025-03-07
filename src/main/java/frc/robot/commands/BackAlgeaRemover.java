@@ -9,12 +9,12 @@ import frc.robot.Constants;
 import frc.robot.subsystems.Arm.*;
 import frc.robot.subsystems.Wrist.*;
 
-public class BackAlgaeRemover extends SequentialCommandGroup {
+public class BackAlgeaRemover extends SequentialCommandGroup {
 
   private final Arm m_armsub;
   private final Wrist m_wristsub;
 
-  public BackAlgaeRemover(Arm m_arm, Wrist m_wrist) {
+  public BackAlgeaRemover(Arm m_arm, Wrist m_wrist) {
 
     m_wristsub = m_wrist;
     m_armsub = m_arm;

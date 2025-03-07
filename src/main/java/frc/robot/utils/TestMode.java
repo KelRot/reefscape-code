@@ -1,6 +1,7 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.subsystems.Arm.ArmConstants;
 import frc.robot.subsystems.Wrist.WristConstants;
 
@@ -9,6 +10,7 @@ public class TestMode {
     public TestMode() {
         SmartDashboard.putBoolean("testMode", true);
         SmartDashboard.putBoolean("isRioPIDController", true);
+        SmartDashboard.putBoolean("Field-Robot", false);
         boolean testMode = SmartDashboard.getBoolean("testMode", true);
         if (testMode) {
             ArmPIDConstants();
@@ -38,7 +40,7 @@ public class TestMode {
         SmartDashboard.putNumber("Wrist/RioKP", WristConstants.rioKP);
         SmartDashboard.putNumber("Wrist/RioKI", WristConstants.rioKI);
         SmartDashboard.putNumber("Wrist/RioKD", WristConstants.rioKD);
-        SmartDashboard.putNumber("Wrist/SetPoint", -12);
+        SmartDashboard.putNumber("Wrist/SetPoint", Constants.LevelAngles.DefaultAngleWrist);
     }
 
     public void MotorDebugValues() {

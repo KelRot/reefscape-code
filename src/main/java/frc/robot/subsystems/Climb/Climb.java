@@ -17,6 +17,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.RobotStatusManager;
+import frc.robot.subsystems.RobotStatusManager.RobotStatus;
 
 
 
@@ -25,6 +27,7 @@ public class Climb extends SubsystemBase {
   private final SparkMax opener_motor, closer_motor; 
   private final SparkClosedLoopController openerPID, closerPID;
   private final SparkMaxConfig motorConfig;
+  private final RobotStatusManager robotStatusManager;
   // I use here PID cuz when setup this type of closedloopcontroller increases motor torque.
   public Climb() {
     opener_motor = new SparkMax(ClimbConstants.openerNeoID, MotorType.kBrushless);
@@ -33,11 +36,13 @@ public class Climb extends SubsystemBase {
     motorConfig.smartCurrentLimit(40);
     openerPID = opener_motor.getClosedLoopController();
     closerPID = closer_motor.getClosedLoopController();
+    robotStatusManager = new RobotStatusManager();
     opener_motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     closer_motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   public void openClimb() {
+    robotStatusManager.setStatus(RobotStatus.Climbing);
     opener_motor.set(0.6);
   }
   public void closeClimb() {
@@ -66,8 +71,7 @@ public void setOpener() {
   double num = SmartDashboard.getNumber("Climb/Opener Set", 0);
   opener_motor.set(num);
 }
-public void setCloser() {
-  double num = SmartDashboard.getNumber("Climb/Closer Set", 0);
+public void setCloser(double num) {
   closer_motor.set(num);
 }
 }
