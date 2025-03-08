@@ -17,10 +17,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.BackShootLevel3;
 import frc.robot.commands.IntakeCmd;
 import frc.robot.commands.ShootLevel2;
+import frc.robot.commands.WristReset;
 import frc.robot.subsystems.RobotStatusManager;
 import frc.robot.subsystems.Arm.Arm;
 import frc.robot.subsystems.Climb.Climb;
@@ -34,7 +36,7 @@ public class RobotContainer {
         private final UsbCamera usbcam = CameraServer.startAutomaticCapture();
 
         final CommandPS5Controller driverController = new CommandPS5Controller(0);
-        final CommandPS4Controller operatorController = new CommandPS4Controller(1);
+        final CommandXboxController operatorController = new CommandXboxController(1);
         private final Wrist wrist = new Wrist();
         private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(),
                         "swerve"));
@@ -45,11 +47,12 @@ public class RobotContainer {
         private final BackShootLevel3 backShootLevel3 = new BackShootLevel3(arm, wrist, robotStatusManager);
         private final ShootLevel2 shootLevel2 = new ShootLevel2(arm, wrist, robotStatusManager);
         private final IntakeCmd IntakeCmd = new IntakeCmd(arm, wrist, robotStatusManager);
+        private final WristReset WristReset = new WristReset(wrist,arm);
 
         SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
                         () -> driverController.getLeftY() * -1,
                         () -> driverController.getLeftX() * -1)
-                        .withControllerRotationAxis(() -> driverController.getRightX())
+                        .withControllerRotationAxis(() -> driverController.getRightX() * -1)
                         .deadband(OperatorConstants.DEADBAND)
                         .scaleTranslation(0.8)
                         .scaleRotation(0.7)
@@ -127,6 +130,7 @@ public class RobotContainer {
                                 .alongWith(new InstantCommand(
                                                 () -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngleWrist))));
                 driverController.button(5).whileTrue(driveRobotOrientedAngularVelocity);
+                operatorController.pov(270).onTrue(WristReset);
                 operatorController.pov(0).onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)));
                 operatorController.pov(90).onTrue(new InstantCommand(() -> backShootLevel3.cancel()));
                 operatorController.pov(180).onTrue(new InstantCommand(() -> wrist.resetAngle()));
@@ -138,7 +142,7 @@ public class RobotContainer {
                                 .whileFalse(new InstantCommand(() -> climb.stopCloser()));
                 operatorController.button(2)
                                 .onTrue(new InstantCommand(() -> arm.setSetPoint(Constants.LevelAngles.DefaultAngle)));
-                operatorController.button(5).onTrue(new InstantCommand(
+                operatorController.button(10).onTrue(new InstantCommand(
                                 () -> arm.setSetPoint(Constants.LevelAngles.BackLevel3))
                                 .alongWith(new InstantCommand(
                                                 () -> wrist.setSetPoint(Constants.LevelAngles.BackLevel3Wrist))));
@@ -159,5 +163,9 @@ public class RobotContainer {
 
         public void setMotorBrake(boolean brake) {
                 drivebase.setMotorBrake(brake);
+        }
+        
+        public void centerModules() {
+                drivebase.centerModulesCommand();
         }
 }

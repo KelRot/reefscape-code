@@ -89,7 +89,7 @@ public class Arm extends SubsystemBase {
     }
     public double getFeedForward(double angleInDegrees) { // Calculates The Feed Forward Value
         double direction = angleInDegrees > 0 ? -1 : 1;
-        return direction * (0.85 * Math.abs(Math.sin(Math.toRadians(Math.abs(angleInDegrees)))));
+        return direction * (0.96 * Math.abs(Math.sin(Math.toRadians(Math.abs(angleInDegrees)))));
     }
     public void setSetPoint(double Angle) {
         SmartDashboard.putNumber("Arm/SetPoint", Angle);
