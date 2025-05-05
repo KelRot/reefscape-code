@@ -68,7 +68,7 @@ public class Wrist extends SubsystemBase {
       return m_sensor.get();
     }
     public double getAngle() {
-      return Rotations.of(masterMotor.getPosition().getValueAsDouble()).in(Degrees) / 8.125 + 15;
+      return Rotations.of(masterMotor.getPosition().getValueAsDouble()).in(Degrees) / 24.92307692307692 + 15;
     }
     
     public double getRealAngle() { 
@@ -76,7 +76,7 @@ public class Wrist extends SubsystemBase {
     }
     public double getFeedForward(double angleInDegrees) { // Calculates The Feed Forward Value
       double direction = angleInDegrees < 0 ? -1 : 1;
-      return direction * (1.02 * Math.abs(Math.sin(Math.toRadians(Math.abs(angleInDegrees)))));
+      return direction * (0.333 * Math.abs(Math.sin(Math.toRadians(Math.abs(angleInDegrees)))));
   }
   
     public void reachSetPoint(double angle) {
@@ -99,12 +99,12 @@ public class Wrist extends SubsystemBase {
       SmartDashboard.putNumber("Wrist/Get Angle", getAngle());
       SmartDashboard.putNumber("Wrist/Real Angle", getRealAngle());
       SmartDashboard.putNumber("Wrist/Output", getFeedForward(getRealAngle()));
-    /*  if(SmartDashboard.getNumber("Wrist/SetPoint", Constants.LevelAngles.DefaultAngleWrist) == Constants.LevelAngles.DefaultAngleWrist){
+     /*if(SmartDashboard.getNumber("Wrist/SetPoint", Constants.LevelAngles.DefaultAngleWrist) == Constants.LevelAngles.DefaultAngleWrist){
         setFeedForward(getRealAngle());
       } else {
         double num = SmartDashboard.getNumber("Wrist/SetPoint", -12);
         reachSetPoint(num);
-      } */
+     } */
       pidController = refreshPidController();
     // This method will be called once per scheduler run
   }

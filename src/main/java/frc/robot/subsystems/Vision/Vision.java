@@ -581,6 +581,13 @@ public class Vision
         }
       }
     }
+    
+    public Optional<PhotonPipelineResult> getBackCamLatestTarget() { 
+      return Cameras.BACK_CAM.getLatestResult();
+    }
+    public Optional<PhotonPipelineResult> getFrontCamLatestTarget() { 
+      return Cameras.FRONT_CAM.getLatestResult();
+    }
 
     /**
      * The latest estimated robot pose on the field from vision data. This may be empty. This should only be called once
@@ -671,10 +678,6 @@ public class Vision
 
   }
 
-
- /*  public Transform2d getPathToShootLeft(){
-    var robotToAprilTagPose = Cameras.BACK_CAM.get_dif();
-    return new Transform2d(robotToAprilTagPose.relativeTo(v_left));
-  } */
+  
 
 }

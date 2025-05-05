@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlignCommand;
 import frc.robot.commands.BackShootLevel3;
 import frc.robot.commands.IntakeCmd;
 import frc.robot.commands.ShootLevel2;
@@ -26,6 +27,7 @@ import frc.robot.commands.WristReset;
 import frc.robot.subsystems.RobotStatusManager;
 import frc.robot.subsystems.Arm.Arm;
 import frc.robot.subsystems.Climb.Climb;
+import frc.robot.subsystems.Drive.AprilTagAligner;
 import frc.robot.subsystems.Drive.Swerve;
 import frc.robot.subsystems.Wrist.Wrist;
 
@@ -42,8 +44,10 @@ public class RobotContainer {
                         "swerve"));
         private final Climb climb = new Climb();
         private final Arm arm = new Arm();
+        private final AprilTagAligner align = new AprilTagAligner("back", drivebase);
         private final RobotStatusManager robotStatusManager = new RobotStatusManager();
 
+        private final AlignCommand alignCommand = new AlignCommand(drivebase, align);
         private final BackShootLevel3 backShootLevel3 = new BackShootLevel3(arm, wrist, robotStatusManager);
         private final ShootLevel2 shootLevel2 = new ShootLevel2(arm, wrist, robotStatusManager);
         private final IntakeCmd IntakeCmd = new IntakeCmd(arm, wrist, robotStatusManager);
@@ -107,9 +111,16 @@ public class RobotContainer {
                 configureBindings();
                 DriverStation.silenceJoystickConnectionWarning(true);
                 NamedCommands.registerCommand("ShootLevel2", shootLevel2);
+                NamedCommands.registerCommand("L1", new InstantCommand(() ->arm.setSetPoint(-15)));
+                NamedCommands.registerCommand("SetDefault", new InstantCommand(() ->arm.setSetPoint(-82.65)));
                 m_Chooser.setDefaultOption("Taxi", drivebase.getAutonomousCommand("Taxi"));
                 m_Chooser.addOption("Right-L2", drivebase.getAutonomousCommand("Right-L2"));
                 m_Chooser.addOption("Turn90", drivebase.getAutonomousCommand("Turn90"));
+                m_Chooser.addOption("middle-l1-choreo", drivebase.getAutonomousCommand("middle-l1-choreo"));
+                m_Chooser.addOption("middle-l1", drivebase.getAutonomousCommand("middle-l1"));
+                m_Chooser.addOption("Right-L2-Choreo", drivebase.getAutonomousCommand("Right-L2-Choreo"));
+                
+
                 SmartDashboard.putData("Auto Selector", m_Chooser);
 
         }
@@ -117,6 +128,7 @@ public class RobotContainer {
         private void configureBindings() {
                 drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
                 driverController.pov(90).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+                driverController.pov(270).onTrue(alignCommand);
                 driverController.pov(0).whileTrue(drivebase.centerModulesCommand());
                 driverController.button(7).onTrue(IntakeCmd);
                 driverController.button(6).onTrue(shootLevel2);
@@ -150,7 +162,7 @@ public class RobotContainer {
                                 () -> arm.setSetPoint(Constants.LevelAngles.Level2))
                                 .alongWith(new InstantCommand(
                                                 () -> wrist.setSetPoint(Constants.LevelAngles.DefaultAngle))));
-                operatorController.button(7).onTrue(new InstantCommand(() -> arm.setSetPoint(20)));
+                operatorController.button(7).onTrue(new InstantCommand(() -> arm.setSetPoint(10)));
                 operatorController.button(9).whileTrue(new InstantCommand(() -> climb.setCloser(-1)))
                                 .whileFalse(new InstantCommand(() -> climb.setCloser(0)));
 

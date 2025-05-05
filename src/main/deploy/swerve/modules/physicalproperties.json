@@ -12,7 +12,7 @@
     },
     "drive": {
       "diameter": 4,
-      "gearRatio": 16.9
+      "gearRatio": 6 
     }
   },
   "rampRate": {

@@ -19,6 +19,7 @@ import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -71,7 +72,7 @@ public class Swerve extends SubsystemBase {
   /**
    * Enable vision odometry updates while driving.
    */
-  private final boolean visionDriveTest = false;
+  private final boolean visionDriveTest = true;
   /**
    * PhotonVision class to keep an accurate odometry.
    */
@@ -112,15 +113,14 @@ public class Swerve extends SubsystemBase {
               // periodically when they are not moving.
     //swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the
                                          // offsets onto it. Throws warning if not possible
-    /*
-     * if (visionDriveTest)
-     * {
-     * setupPhotonVision();
-     * // Stop the odometry thread if we are using vision that way we can
-     * synchronize updates better.
-     * swerveDrive.stopOdometryThread();
-     * }
-     */
+    
+      if (visionDriveTest)
+      {
+      setupPhotonVision();
+      // Stop the odometry thread if we are using vision that way we can
+      swerveDrive.stopOdometryThread();
+      }
+     
     setupPathPlanner();
   }
 
@@ -744,6 +744,12 @@ public class Swerve extends SubsystemBase {
    */
   public void addFakeVisionReading() {
     swerveDrive.addVisionMeasurement(new Pose2d(3, 3, Rotation2d.fromDegrees(65)), Timer.getFPGATimestamp());
+  }
+
+  public void getYawPoseNDrive() {
+    PIDController yawOffSet = new PIDController(0.08,0,0);
+    yawOffSet.setTolerance(0.05);
+    
   }
 
   /**

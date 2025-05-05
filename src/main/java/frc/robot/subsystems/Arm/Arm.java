@@ -78,7 +78,6 @@ public class Arm extends SubsystemBase {
           pidOutput = direction * Math.min(1.37, Math.abs(pidOutput));
           lastOutput = pidOutput;
           masterMotor.setVoltage(pidOutput + getFeedForward(getAngle()));
-          System.out.println(angle);
           SmartDashboard.putNumber("pidoutput", pidOutput);
           SmartDashboard.putNumber("voltage angle", getAngle());
         } else

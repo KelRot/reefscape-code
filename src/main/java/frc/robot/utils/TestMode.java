@@ -11,6 +11,7 @@ public class TestMode {
         SmartDashboard.putBoolean("testMode", true);
         SmartDashboard.putBoolean("isRioPIDController", true);
         SmartDashboard.putBoolean("Field-Robot", false);
+        SmartDashboard.putBoolean("Alignment", false);
         boolean testMode = SmartDashboard.getBoolean("testMode", true);
         if (testMode) {
             ArmPIDConstants();

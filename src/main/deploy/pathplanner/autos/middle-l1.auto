@@ -7,13 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right-L2"
+            "pathName": "Middle-L1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Right-L2"
+            "name": "L1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SetDefault"
           }
         }
       ]
