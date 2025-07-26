@@ -4,13 +4,18 @@
 
 package frc.robot;
 
+import edu.wpi.first.hal.can.CANStatus;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.RobotStatusManager;
 import frc.robot.subsystems.Drive.SwerveConstants;
+import frc.robot.utils.TestMode;
 
 /**
  * The methods in this class are called automatically corresponding to each
@@ -24,20 +29,21 @@ public class Robot extends TimedRobot {
   private RobotStatusManager statusManager;
   private RobotContainer m_robotContainer;
   private Timer disabledTimer;
-  private static Robot   instance;
+  private static Robot instance;
+  private TestMode testMode;
+
   /**
-     * This function is run when the robot is first started up and should be used for any
-     * initialization code.
-     */
-    public Robot()
-    {
-      instance = this;
-    }
-  
-    public static Robot getInstance()
-    {
-      return instance;
-    }
+   * This function is run when the robot is first started up and should be used
+   * for any
+   * initialization code.
+   */
+  public Robot() {
+    instance = this;
+  }
+
+  public static Robot getInstance() {
+    return instance;
+  }
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items
@@ -56,19 +62,18 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     statusManager = new RobotStatusManager();
     m_robotContainer = new RobotContainer();
+    testMode = new TestMode();
 
     // Create a timer to disable motor brake a few seconds after disable. This will
     // let the robot stop
     // immediately when disabled, but then also let it be pushed more
     disabledTimer = new Timer();
-
-    if (isSimulation()) {
-      DriverStation.silenceJoystickConnectionWarning(true);
-    }
+    DriverStation.silenceJoystickConnectionWarning(true);
   }
 
   @Override
   public void robotPeriodic() {
+    CANStatus rioCanStatus = RobotController.getCANStatus();
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled
     // commands, running already-scheduled commands, removing finished or
@@ -78,6 +83,20 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     statusManager.periodic();
+    SmartDashboard.putNumber(
+        "RoboRIO/CAN Status/Utilization %", rioCanStatus.percentBusUtilization * 100.0);
+    SmartDashboard.putNumber("RoboRIO/CAN Status/Bus Off Count", rioCanStatus.busOffCount);
+    SmartDashboard.putNumber(
+        "RoboRIO/CAN Status/Receive Error Count", rioCanStatus.receiveErrorCount);
+    SmartDashboard.putNumber(
+        "RoboRIO/CAN Status/Transmit Error Count", rioCanStatus.transmitErrorCount);
+    SmartDashboard.putNumber("RoboRIO/CAN Status/Tx Full Count", rioCanStatus.txFullCount);
+
+    SmartDashboard.putNumber("RoboRIO/CPU Temperature", RobotController.getCPUTemp());
+    SmartDashboard.putBoolean("RoboRIO/RSL", RobotController.getRSLState());
+    SmartDashboard.putNumber("RoboRIO/Input Current", RobotController.getInputCurrent());
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    SmartDashboard.putNumber("Battery Voltage", RobotController.getBatteryVoltage());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -86,6 +105,8 @@ public class Robot extends TimedRobot {
     m_robotContainer.setMotorBrake(true);
     disabledTimer.reset();
     disabledTimer.start();
+    SmartDashboard.putNumber("Arm/SetPoint", Constants.LevelAngles.DefaultAngle);
+    SmartDashboard.putNumber("Wrist/SetPoint", Constants.LevelAngles.DefaultAngleWrist);
   }
 
   @Override
@@ -102,6 +123,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    m_robotContainer.centerModules();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -129,12 +151,14 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+
   }
 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    SmartDashboard.putBoolean("testMode", true);
   }
 
   /** This function is called periodically during test mode. */

@@ -10,11 +10,11 @@ public class RobotStatusManager {
     public enum RobotStatus {
         Alignment(255,0,0, true), // Blinking Red
         CountDown_Intake(0, 255, 0, true),
-        Has_Coral(0,255,0, false), // Blinking Green 
+        Has_Coral(0,255,0, false), 
         ShootingL1(255, 0, 255, true),     // Blinking Purple
         ShootingL2(0, 0, 255, true),       // Blinking Blue
         ShootingL3(255, 0, 0, true),       // Blinking Red
-        Removing_Algae(0, 255, 0, true),    // Blinking Green
+        Removing_Algae(0, 255, 0, true),    // Blinking Green // Blinking Green
         Climbing(0, 0, 0, false),          // Rainbow
         Nothing(0, 0, 0, false);           // Sliding 
         public final int r, g, b;
@@ -27,8 +27,8 @@ public class RobotStatusManager {
             this.blinking = blinking;
         }
     }
-
-    private RobotStatus currentStatus;
+    
+    /*private RobotStatus currentStatus;
     private final AddressableLED ledStrip;
     private final AddressableLEDBuffer ledBuffer;
     private final Timer blinkTimer;
@@ -36,14 +36,14 @@ public class RobotStatusManager {
     private int movingPixelIndex = 0;
     private int movingPixelHue = 0;
     private boolean isBlinkOn = true;
-    private boolean ledSystemEnabled = true; // LED Sistemi Acık/Kapalı Durumu
+    private boolean ledSystemEnabled = true;
     private static final int LED_LENGTH = GeneralConstants.LED_LENGTH;
-
+*/
     public RobotStatusManager() {
-        this.currentStatus = RobotStatus.Alignment;
+       // this.currentStatus = RobotStatus.Climbing;
 
-        // LED Şeridi Baslat
-        ledStrip = new AddressableLED(GeneralConstants.LED_PWM_PORT);
+     
+       /*  ledStrip = new AddressableLED(GeneralConstants.LED_PWM_PORT);
         ledBuffer = new AddressableLEDBuffer(LED_LENGTH);
         ledStrip.setLength(LED_LENGTH);
         ledStrip.setData(ledBuffer);
@@ -55,15 +55,15 @@ public class RobotStatusManager {
         
         SmartDashboard.putBoolean("LED System", ledSystemEnabled);
     }
-
+    */}
     public void setStatus(RobotStatus newStatus) {
-        if (this.currentStatus != newStatus) { // Aynı duruma tekrar geçme
+       /*  if (this.currentStatus != newStatus) { 
             this.currentStatus = newStatus;
             SmartDashboard.putString("Robot Status", newStatus.name());
-        }
+        }*/
     }
 
-    public RobotStatus getStatus() {
+   /*  public RobotStatus getStatus() {
         return this.currentStatus;
     }
 
@@ -116,8 +116,8 @@ public class RobotStatusManager {
         }
         ledStrip.setData(ledBuffer);
     }
-
-    public void periodic() {
+*/
+    public void periodic() {/* 
         if (!ledSystemEnabled) {
             return; // LED Sistemi Kapalıysa Çalışma
         }
@@ -141,6 +141,7 @@ public class RobotStatusManager {
             } else {
                 updateLEDBuffer(0, 0, 0);
             }
-        }
+        }*/
     }
 }
+
